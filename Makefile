@@ -1,6 +1,3 @@
-DUCKDB_REPO=https://github.com/duckdb/duckdb.git
-DUCKDB_BRANCH=v1.1.1
-
 SUBSTRAIT_REPO=https://github.com/substrait-io/duckdb-substrait-extension.git
 SUBSTRAIT_BRANCH=main
 
@@ -48,18 +45,13 @@ $(if $(filter TRUE,$(or $(BUILD_CORE),TRUE)), $(CORE_COMMAND))
 $(if $(filter TRUE,$(or $(BUILD_SUBSTRAIT),TRUE)), $(SUBSTRAIT_COMMAND))
 endef
 
-.PHONY: duckdb
-duckdb:
-	rm -rf duckdb
-	git clone -b $(DUCKDB_BRANCH) --depth 1 $(DUCKDB_REPO)
-
 .PHONY: substrait
 substrait:
 	rm -rf substrait
 	git clone -b $(SUBSTRAIT_BRANCH) --depth 1 $(SUBSTRAIT_REPO) --recurse-submodules substrait
 
 .PHONY: deps.header
-deps.header: duckdb substrait
+deps.header: substrait
 	mkdir -p include
 	cp substrait/src/include/substrait_extension.hpp include/
 	cp duckdb/extension/icu/include/icu_extension.hpp include/
