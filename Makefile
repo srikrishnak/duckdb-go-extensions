@@ -10,6 +10,8 @@ ICEBERG_BRANCH=main
 BOOST_REPO=https://github.com/boostorg/boost.git
 BOOST_BRANCH=boost-1.87.0
 
+AVRO_VERSION=1.12.0
+
 CFLAGS   = -O3
 CXXFLAGS = -O3
 CC 		 = ""
@@ -46,6 +48,28 @@ BOOST_IOSTREAMS_COMMAND = \
 	./b2 libs/iostreams stage && \
 	cp ./stage/lib/libboost_iostreams.a ../deps/$(DEP_NAME)
 
+AVRO_CPP_VERSION = 1.12.0
+AVRO_CPP_DIR = avro-cpp-$(AVRO_CPP_VERSION)
+AVRO_CPP_TARBALL = $(AVRO_CPP_DIR).tar.gz
+AVRO_CPP_DOWNLOAD_URL = https://archive.apache.org/dist/avro/avro-$(AVRO_CPP_VERSION)/cpp/$(AVRO_CPP_TARBALL)
+
+AVRO_CPP_COMMAND = \
+	@if [ ! -d "$(AVRO_CPP_DIR)" ]; then \
+	  echo "Downloading Avro C++ $(AVRO_CPP_VERSION)... from $(AVRO_CPP_DOWNLOAD_URL)"; \
+	  wget $(AVRO_CPP_DOWNLOAD_URL); \
+	  mkdir -p $(AVRO_CPP_DIR); \
+	  tar -xzf $(AVRO_CPP_TARBALL) -C $(AVRO_CPP_DIR) --strip-components=1; \
+	fi; \
+	echo "Building and installing Avro C++..."; \
+	cd $(PWD)/$(AVRO_CPP_DIR) && MACOSX_DEPLOYMENT_TARGET=11.0 ./build.sh install || true; \
+	if [ ! -f $(PWD)/$(AVRO_CPP_DIR)/build/libavrocpp_s.a ]; then \
+	  echo "Error: libavrocpp_s.a not found!"; \
+	  exit 1; \
+	fi; \
+	echo "libavrocpp_s.a found, copying to $(PWD)/deps/$(DEP_NAME)"; \
+	cp $(PWD)/$(AVRO_CPP_DIR)/build/libavrocpp_s.a $(PWD)/deps/$(DEP_NAME)
+
+
 PRE_COMPILE_TARGETS :=
 
 # Add
@@ -66,6 +90,7 @@ $(MKDIR_COMMAND)
 $(if $(filter TRUE,$(or $(BUILD_CORE),TRUE)), $(CORE_COMMAND))
 $(if $(filter TRUE,$(or $(BUILD_SUBSTRAIT),TRUE)), $(SUBSTRAIT_COMMAND))
 $(if $(filter TRUE,$(or $(BUILD_BOOST_IOSTREAMS),TRUE)), $(BOOST_IOSTREAMS_COMMAND))
+$(if $(filter TRUE,$(or $(BUILD_AVRO_CPP),TRUE)), $(AVRO_CPP_COMMAND))
 endef
 
 .PHONY: duckdb
@@ -136,26 +161,3 @@ deps.linux.arm64: DEP_NAME = linux_arm64
 deps.linux.arm64: $(PRE_COMPILE_TARGETS)
 	$(CHECK_LINUX)
 	$(get_build_commands)
-
-.PHONY: deps.avrocpp
-deps.avrocpp: AVRO_DIR = avro-cpp-$(AVRO_VERSION)
-deps.avrocpp:
-	# Ensure AVRO_VERSION is defined
-	@if [ -z "$(AVRO_VERSION)" ]; then \
-	  echo "Error: AVRO_VERSION is not defined. Please set it as an environment variable."; \
-	  exit 1; \
-	fi
-
-	# Print for debugging
-	@echo "Using AVRO_DIR: $(AVRO_DIR)"
-	@mkdir -p $(AVRO_DIR)
-
-	# Download and extract Avro C++ source if not already present
-	@if [ ! -d "$(AVRO_DIR)/src" ]; then \
-	  echo "Downloading Avro C++ $(AVRO_VERSION)..."; \
-	  wget https://archive.apache.org/dist/avro/avro-$(AVRO_VERSION)/cpp/$(AVRO_DIR).tar.gz; \
-	  tar -xzf $(AVRO_DIR).tar.gz -C $(AVRO_DIR); \
-	fi
-
-	# Build and install
-	@cd $(AVRO_DIR)/$(AVRO_DIR) && sudo MACOSX_DEPLOYMENT_TARGET=11.0 ./build.sh install

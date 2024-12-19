@@ -22,9 +22,10 @@ jobs:
     strategy:
       matrix:
         build_type:
-          - { name: 'core', BUILD_CORE: 'TRUE', BUILD_SUBSTRAIT: 'FALSE', BUILD_BOOST_IOSTREAMS: 'FALSE' }
-          - { name: 'substrait', BUILD_CORE: 'FALSE', BUILD_SUBSTRAIT: 'TRUE', BUILD_BOOST_IOSTREAMS: 'FALSE' }
-          - { name: 'boost_iostreams', BUILD_CORE: 'FALSE', BUILD_SUBSTRAIT: 'FALSE', BUILD_BOOST_IOSTREAMS: 'TRUE' }
+          - { name: 'core', BUILD_CORE: 'TRUE', BUILD_SUBSTRAIT: 'FALSE', BUILD_BOOST_IOSTREAMS: 'FALSE', BUILD_AVRO_CPP: 'FALSE' }
+          - { name: 'substrait', BUILD_CORE: 'FALSE', BUILD_SUBSTRAIT: 'TRUE', BUILD_BOOST_IOSTREAMS: 'FALSE', BUILD_AVRO_CPP: 'FALSE' }
+          - { name: 'boost_iostreams', BUILD_CORE: 'FALSE', BUILD_SUBSTRAIT: 'FALSE', BUILD_BOOST_IOSTREAMS: 'TRUE', BUILD_AVRO_CPP: 'FALSE' }
+          - { name: 'avrocpp', BUILD_CORE: 'FALSE', BUILD_SUBSTRAIT: 'FALSE', BUILD_BOOST_IOSTREAMS: 'FALSE', BUILD_AVRO_CPP: 'TRUE' }
     steps:
       - uses: actions/checkout@v4
         with:
@@ -34,7 +35,13 @@ jobs:
           BUILD_CORE: ${{ matrix.build_type.BUILD_CORE }}
           BUILD_SUBSTRAIT: ${{ matrix.build_type.BUILD_SUBSTRAIT }}
           BUILD_BOOST_IOSTREAMS: ${{ matrix.build_type.BUILD_BOOST_IOSTREAMS }}
-        run: make deps.darwin.amd64
+          BUILD_AVRO_CPP: ${{ matrix.build_type.BUILD_AVRO_CPP }}
+        run: |
+          if [[ "${BUILD_AVRO_CPP}" == "TRUE" ]]; then
+            brew update
+            brew install boost cmake
+          fi
+          make deps.darwin.amd64
       - uses: actions/upload-artifact@v4
         with:
           name: darwin_amd64_${{ matrix.build_type.name }}
@@ -46,9 +53,10 @@ jobs:
     strategy:
       matrix:
         build_type:
-          - { name: 'core', BUILD_CORE: 'TRUE', BUILD_SUBSTRAIT: 'FALSE', BUILD_BOOST_IOSTREAMS: 'FALSE' }
-          - { name: 'substrait', BUILD_CORE: 'FALSE', BUILD_SUBSTRAIT: 'TRUE', BUILD_BOOST_IOSTREAMS: 'FALSE' }
-          - { name: 'boost_iostreams', BUILD_CORE: 'FALSE', BUILD_SUBSTRAIT: 'FALSE', BUILD_BOOST_IOSTREAMS: 'TRUE' }
+          - { name: 'core', BUILD_CORE: 'TRUE', BUILD_SUBSTRAIT: 'FALSE', BUILD_BOOST_IOSTREAMS: 'FALSE', BUILD_AVRO_CPP: 'FALSE' }
+          - { name: 'substrait', BUILD_CORE: 'FALSE', BUILD_SUBSTRAIT: 'TRUE', BUILD_BOOST_IOSTREAMS: 'FALSE', BUILD_AVRO_CPP: 'FALSE' }
+          - { name: 'boost_iostreams', BUILD_CORE: 'FALSE', BUILD_SUBSTRAIT: 'FALSE', BUILD_BOOST_IOSTREAMS: 'TRUE', BUILD_AVRO_CPP: 'FALSE' }
+          - { name: 'avrocpp', BUILD_CORE: 'FALSE', BUILD_SUBSTRAIT: 'FALSE', BUILD_BOOST_IOSTREAMS: 'FALSE', BUILD_AVRO_CPP: 'TRUE' }
     steps:
       - uses: actions/checkout@v4
         with:
@@ -58,7 +66,13 @@ jobs:
           BUILD_CORE: ${{ matrix.build_type.BUILD_CORE }}
           BUILD_SUBSTRAIT: ${{ matrix.build_type.BUILD_SUBSTRAIT }}
           BUILD_BOOST_IOSTREAMS: ${{ matrix.build_type.BUILD_BOOST_IOSTREAMS }}
-        run: make deps.darwin.arm64
+          BUILD_AVRO_CPP: ${{ matrix.build_type.BUILD_AVRO_CPP }}
+        run: |
+          if [[ "${BUILD_AVRO_CPP}" == "TRUE" ]]; then
+            brew update
+            brew install boost cmake
+          fi
+          make deps.darwin.arm64
       - uses: actions/upload-artifact@v4
         with:
           name: darwin_arm64_${{ matrix.build_type.name }}
@@ -70,9 +84,10 @@ jobs:
     strategy:
       matrix:
         build_type:
-          - { name: 'core', BUILD_CORE: 'TRUE', BUILD_SUBSTRAIT: 'FALSE', BUILD_BOOST_IOSTREAMS: 'FALSE' }
-          - { name: 'substrait', BUILD_CORE: 'FALSE', BUILD_SUBSTRAIT: 'TRUE', BUILD_BOOST_IOSTREAMS: 'FALSE' }
-          - { name: 'boost_iostreams', BUILD_CORE: 'FALSE', BUILD_SUBSTRAIT: 'FALSE', BUILD_BOOST_IOSTREAMS: 'TRUE' }
+          - { name: 'core', BUILD_CORE: 'TRUE', BUILD_SUBSTRAIT: 'FALSE', BUILD_BOOST_IOSTREAMS: 'FALSE', BUILD_AVRO_CPP: 'FALSE' }
+          - { name: 'substrait', BUILD_CORE: 'FALSE', BUILD_SUBSTRAIT: 'TRUE', BUILD_BOOST_IOSTREAMS: 'FALSE', BUILD_AVRO_CPP: 'FALSE' }
+          - { name: 'boost_iostreams', BUILD_CORE: 'FALSE', BUILD_SUBSTRAIT: 'FALSE', BUILD_BOOST_IOSTREAMS: 'TRUE', BUILD_AVRO_CPP: 'FALSE' }
+          - { name: 'avrocpp', BUILD_CORE: 'FALSE', BUILD_SUBSTRAIT: 'FALSE', BUILD_BOOST_IOSTREAMS: 'FALSE', BUILD_AVRO_CPP: 'TRUE' }
     steps:
       - uses: actions/checkout@v4
         with:
@@ -82,7 +97,13 @@ jobs:
           BUILD_CORE: ${{ matrix.build_type.BUILD_CORE }}
           BUILD_SUBSTRAIT: ${{ matrix.build_type.BUILD_SUBSTRAIT }}
           BUILD_BOOST_IOSTREAMS: ${{ matrix.build_type.BUILD_BOOST_IOSTREAMS }}
-        run: make deps.linux.amd64
+          BUILD_AVRO_CPP: ${{ matrix.build_type.BUILD_AVRO_CPP }}
+        run: |
+          if [[ "${BUILD_AVRO_CPP}" == "TRUE" ]]; then
+            sudo apt-get update
+            sudo apt-get install -y libboost-all-dev libboost-iostreams-dev libboost-system-dev cmake
+          fi
+          make deps.linux.amd64
       - uses: actions/upload-artifact@v4
         with:
           name: linux_amd64_${{ matrix.build_type.name }}
@@ -94,9 +115,10 @@ jobs:
     strategy:
       matrix:
         build_type:
-          - { name: 'core', BUILD_CORE: 'TRUE', BUILD_SUBSTRAIT: 'FALSE', BUILD_BOOST_IOSTREAMS: 'FALSE' }
-          - { name: 'substrait', BUILD_CORE: 'FALSE', BUILD_SUBSTRAIT: 'TRUE', BUILD_BOOST_IOSTREAMS: 'FALSE' }
-          - { name: 'boost_iostreams', BUILD_CORE: 'FALSE', BUILD_SUBSTRAIT: 'FALSE', BUILD_BOOST_IOSTREAMS: 'TRUE' }
+          - { name: 'core', BUILD_CORE: 'TRUE', BUILD_SUBSTRAIT: 'FALSE', BUILD_BOOST_IOSTREAMS: 'FALSE', BUILD_AVRO_CPP: 'FALSE' }
+          - { name: 'substrait', BUILD_CORE: 'FALSE', BUILD_SUBSTRAIT: 'TRUE', BUILD_BOOST_IOSTREAMS: 'FALSE', BUILD_AVRO_CPP: 'FALSE' }
+          - { name: 'boost_iostreams', BUILD_CORE: 'FALSE', BUILD_SUBSTRAIT: 'FALSE', BUILD_BOOST_IOSTREAMS: 'TRUE', BUILD_AVRO_CPP: 'FALSE' }
+          - { name: 'avrocpp', BUILD_CORE: 'FALSE', BUILD_SUBSTRAIT: 'FALSE', BUILD_BOOST_IOSTREAMS: 'FALSE', BUILD_AVRO_CPP: 'TRUE' }
     steps:
       - uses: actions/checkout@v4
         with:
@@ -111,7 +133,13 @@ jobs:
           BUILD_CORE: ${{ matrix.build_type.BUILD_CORE }}
           BUILD_SUBSTRAIT: ${{ matrix.build_type.BUILD_SUBSTRAIT }}
           BUILD_BOOST_IOSTREAMS: ${{ matrix.build_type.BUILD_BOOST_IOSTREAMS }}
-        run: make deps.linux.arm64
+          BUILD_AVRO_CPP: ${{ matrix.build_type.BUILD_AVRO_CPP }}
+        run: |
+          if [[ "${BUILD_AVRO_CPP}" == "TRUE" ]]; then
+            sudo apt-get update
+            sudo apt-get install -y libboost-all-dev libboost-iostreams-dev libboost-system-dev cmake
+          fi
+          make deps.linux.arm64
       - uses: actions/upload-artifact@v4
         with:
           name: linux_arm64_${{ matrix.build_type.name }}
@@ -206,9 +234,6 @@ jobs:
       matrix:
         os: [ macos-13, macos-13-xlarge, ubuntu-20.04, arm64-builders ]
 
-    env:
-      AVRO_VERSION: 1.12.0
-
     steps:
       - name: Dump System Architecture
         run: |
@@ -233,31 +258,5 @@ jobs:
         with:
           go-version: ${{ env.go-version }}
 
-      - name: Install Dependencies
-        run: |
-          if [[ "${{ matrix.os }}" == "ubuntu-20.04" ]]; then
-            sudo apt-get update
-            sudo apt-get install -y libboost-all-dev libboost-iostreams-dev libboost-system-dev cmake
-          elif [[ "${{ matrix.os }}" == "arm64-builders" ]]; then
-            sudo apt-get update
-            sudo apt-get install -y libboost-all-dev libboost-iostreams-dev libboost-system-dev cmake
-          elif [[ "${{ matrix.os }}" == "macos-13" ]]; then
-            brew update
-            brew install boost cmake
-          elif [[ "${{ matrix.os }}" == "macos-13-xlarge" ]]; then
-            brew update
-            brew install boost cmake
-          fi
-
-      - name: Install Avro C++ from Source
-        run: make deps.avrocpp
-
       - name: Run tests
-        run: |
-          if [[ "${{ matrix.os }}" == "macos-13-xlarge" ]]; then
-            ls /opt/homebrew/Cellar/boost/1.87.0/lib/libboost_iostreams.dylib
-            export DYLD_LIBRARY_PATH="/opt/homebrew/Cellar/boost/1.87.0/lib:$DYLD_LIBRARY_PATH"
-            export CGO_LDFLAGS="-L/opt/homebrew/Cellar/boost/1.87.0/lib"
-            echo $DYLD_LIBRARY_PATH
-          fi
-          go test -run ^TestLoaded
+        run: go test -run ^TestLoaded
