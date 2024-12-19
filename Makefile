@@ -4,6 +4,14 @@ DUCKDB_BRANCH=v1.1.1
 SUBSTRAIT_REPO=https://github.com/substrait-io/duckdb-substrait-extension.git
 SUBSTRAIT_BRANCH=main
 
+ICEBERG_REPO=https://github.com/duckdb/duckdb_iceberg.git
+ICEBERG_BRANCH=main
+
+BOOST_REPO=https://github.com/boostorg/boost.git
+BOOST_BRANCH=boost-1.87.0
+
+AVRO_VERSION=1.12.0
+
 CFLAGS   = -O3
 CXXFLAGS = -O3
 CC 		 = ""
@@ -31,6 +39,37 @@ SUBSTRAIT_COMMAND = \
 	cd .. && \
 	cp substrait/build/release/extension/substrait/libsubstrait_extension.a deps/$(DEP_NAME)
 
+BOOST_IOSTREAMS_COMMAND = \
+	mkdir -p ./boost_include && \
+	export BOOST_INCLUDEDIR=$(PWD)/boost_include && \
+	cd boost && \
+	./bootstrap.sh && \
+	./b2 headers && \
+	./b2 libs/iostreams stage && \
+	cp ./stage/lib/libboost_iostreams.a ../deps/$(DEP_NAME)
+
+AVRO_CPP_VERSION = 1.12.0
+AVRO_CPP_DIR = avro-cpp-$(AVRO_CPP_VERSION)
+AVRO_CPP_TARBALL = $(AVRO_CPP_DIR).tar.gz
+AVRO_CPP_DOWNLOAD_URL = https://archive.apache.org/dist/avro/avro-$(AVRO_CPP_VERSION)/cpp/$(AVRO_CPP_TARBALL)
+
+AVRO_CPP_COMMAND = \
+	@if [ ! -d "$(AVRO_CPP_DIR)" ]; then \
+	  echo "Downloading Avro C++ $(AVRO_CPP_VERSION)... from $(AVRO_CPP_DOWNLOAD_URL)"; \
+	  wget $(AVRO_CPP_DOWNLOAD_URL); \
+	  mkdir -p $(AVRO_CPP_DIR); \
+	  tar -xzf $(AVRO_CPP_TARBALL) -C $(AVRO_CPP_DIR) --strip-components=1; \
+	fi; \
+	echo "Building and installing Avro C++..."; \
+	cd $(PWD)/$(AVRO_CPP_DIR) && MACOSX_DEPLOYMENT_TARGET=11.0 ./build.sh install || true; \
+	if [ ! -f $(PWD)/$(AVRO_CPP_DIR)/build/libavrocpp_s.a ]; then \
+	  echo "Error: libavrocpp_s.a not found!"; \
+	  exit 1; \
+	fi; \
+	echo "libavrocpp_s.a found, copying to $(PWD)/deps/$(DEP_NAME)"; \
+	cp $(PWD)/$(AVRO_CPP_DIR)/build/libavrocpp_s.a $(PWD)/deps/$(DEP_NAME)
+
+
 PRE_COMPILE_TARGETS :=
 
 # Add
@@ -42,10 +81,16 @@ ifneq ($(BUILD_SUBSTRAIT),false)
 PRE_COMPILE_TARGETS += substrait
 endif
 
+ifneq ($(BUILD_BOOST_IOSTREAMS),false)
+PRE_COMPILE_TARGETS += boost
+endif
+
 define get_build_commands
 $(MKDIR_COMMAND)
 $(if $(filter TRUE,$(or $(BUILD_CORE),TRUE)), $(CORE_COMMAND))
 $(if $(filter TRUE,$(or $(BUILD_SUBSTRAIT),TRUE)), $(SUBSTRAIT_COMMAND))
+$(if $(filter TRUE,$(or $(BUILD_BOOST_IOSTREAMS),TRUE)), $(BOOST_IOSTREAMS_COMMAND))
+$(if $(filter TRUE,$(or $(BUILD_AVRO_CPP),TRUE)), $(AVRO_CPP_COMMAND))
 endef
 
 .PHONY: duckdb
@@ -58,8 +103,18 @@ substrait:
 	rm -rf substrait
 	git clone -b $(SUBSTRAIT_BRANCH) --depth 1 $(SUBSTRAIT_REPO) --recurse-submodules substrait
 
+.PHONY: iceberg
+iceberg:
+	rm -rf duckdb_iceberg
+	git clone -b $(ICEBERG_BRANCH) --depth 1 $(ICEBERG_REPO) --recurse-submodules
+
+.PHONY: boost
+boost:
+	rm -rf boost
+	git clone -b $(BOOST_BRANCH) --depth 1 $(BOOST_REPO) --recurse-submodules
+
 .PHONY: deps.header
-deps.header: duckdb substrait
+deps.header: duckdb substrait iceberg
 	mkdir -p include
 	cp substrait/src/include/substrait_extension.hpp include/
 	cp duckdb/extension/icu/include/icu_extension.hpp include/
@@ -67,6 +122,7 @@ deps.header: duckdb substrait
 	cp duckdb/extension/tpch/include/tpch_extension.hpp include/
 	cp duckdb/extension/tpcds/include/tpcds_extension.hpp include/
 	cp duckdb/extension/parquet/include/parquet_extension.hpp include/
+	cp duckdb_iceberg/src/include/iceberg_extension.hpp include/
 	sed '/#include "duckdb\/main\/client_context.hpp"/d' include/tpcds_extension.hpp > temp_file && mv temp_file include/tpcds_extension.hpp
 	cd duckdb && python3 scripts/amalgamation.py
 	cp duckdb/src/amalgamation/duckdb.hpp include/
@@ -105,4 +161,3 @@ deps.linux.arm64: DEP_NAME = linux_arm64
 deps.linux.arm64: $(PRE_COMPILE_TARGETS)
 	$(CHECK_LINUX)
 	$(get_build_commands)
-
