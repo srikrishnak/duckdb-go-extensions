@@ -22,8 +22,9 @@ jobs:
     strategy:
       matrix:
         build_type:
-          - { name: 'core', BUILD_CORE: 'TRUE', BUILD_SUBSTRAIT: 'FALSE' }
-          - { name: 'substrait', BUILD_CORE: 'FALSE', BUILD_SUBSTRAIT: 'TRUE' }
+          - { name: 'core', BUILD_CORE: 'TRUE', BUILD_SUBSTRAIT: 'FALSE', BUILD_BOOST_IOSTREAMS: 'FALSE' }
+          - { name: 'substrait', BUILD_CORE: 'FALSE', BUILD_SUBSTRAIT: 'TRUE', BUILD_BOOST_IOSTREAMS: 'FALSE' }
+          - { name: 'boost_iostreams', BUILD_CORE: 'FALSE', BUILD_SUBSTRAIT: 'FALSE', BUILD_BOOST_IOSTREAMS: 'TRUE' }
     steps:
       - uses: actions/checkout@v4
         with:
@@ -32,6 +33,7 @@ jobs:
         env:
           BUILD_CORE: ${{ matrix.build_type.BUILD_CORE }}
           BUILD_SUBSTRAIT: ${{ matrix.build_type.BUILD_SUBSTRAIT }}
+          BUILD_BOOST_IOSTREAMS: ${{ matrix.build_type.BUILD_BOOST_IOSTREAMS }}
         run: make deps.darwin.amd64
       - uses: actions/upload-artifact@v4
         with:
@@ -44,8 +46,9 @@ jobs:
     strategy:
       matrix:
         build_type:
-          - { name: 'core', BUILD_CORE: 'TRUE', BUILD_SUBSTRAIT: 'FALSE' }
-          - { name: 'substrait', BUILD_CORE: 'FALSE', BUILD_SUBSTRAIT: 'TRUE' }
+          - { name: 'core', BUILD_CORE: 'TRUE', BUILD_SUBSTRAIT: 'FALSE', BUILD_BOOST_IOSTREAMS: 'FALSE' }
+          - { name: 'substrait', BUILD_CORE: 'FALSE', BUILD_SUBSTRAIT: 'TRUE', BUILD_BOOST_IOSTREAMS: 'FALSE' }
+          - { name: 'boost_iostreams', BUILD_CORE: 'FALSE', BUILD_SUBSTRAIT: 'FALSE', BUILD_BOOST_IOSTREAMS: 'TRUE' }
     steps:
       - uses: actions/checkout@v4
         with:
@@ -54,6 +57,7 @@ jobs:
         env:
           BUILD_CORE: ${{ matrix.build_type.BUILD_CORE }}
           BUILD_SUBSTRAIT: ${{ matrix.build_type.BUILD_SUBSTRAIT }}
+          BUILD_BOOST_IOSTREAMS: ${{ matrix.build_type.BUILD_BOOST_IOSTREAMS }}
         run: make deps.darwin.arm64
       - uses: actions/upload-artifact@v4
         with:
@@ -66,8 +70,9 @@ jobs:
     strategy:
       matrix:
         build_type:
-          - { name: 'core', BUILD_CORE: 'TRUE', BUILD_SUBSTRAIT: 'FALSE' }
-          - { name: 'substrait', BUILD_CORE: 'FALSE', BUILD_SUBSTRAIT: 'TRUE' }
+          - { name: 'core', BUILD_CORE: 'TRUE', BUILD_SUBSTRAIT: 'FALSE', BUILD_BOOST_IOSTREAMS: 'FALSE' }
+          - { name: 'substrait', BUILD_CORE: 'FALSE', BUILD_SUBSTRAIT: 'TRUE', BUILD_BOOST_IOSTREAMS: 'FALSE' }
+          - { name: 'boost_iostreams', BUILD_CORE: 'FALSE', BUILD_SUBSTRAIT: 'FALSE', BUILD_BOOST_IOSTREAMS: 'TRUE' }
     steps:
       - uses: actions/checkout@v4
         with:
@@ -76,6 +81,7 @@ jobs:
         env:
           BUILD_CORE: ${{ matrix.build_type.BUILD_CORE }}
           BUILD_SUBSTRAIT: ${{ matrix.build_type.BUILD_SUBSTRAIT }}
+          BUILD_BOOST_IOSTREAMS: ${{ matrix.build_type.BUILD_BOOST_IOSTREAMS }}
         run: make deps.linux.amd64
       - uses: actions/upload-artifact@v4
         with:
@@ -88,8 +94,9 @@ jobs:
     strategy:
       matrix:
         build_type:
-          - { name: 'core', BUILD_CORE: 'TRUE', BUILD_SUBSTRAIT: 'FALSE' }
-          - { name: 'substrait', BUILD_CORE: 'FALSE', BUILD_SUBSTRAIT: 'TRUE' }
+          - { name: 'core', BUILD_CORE: 'TRUE', BUILD_SUBSTRAIT: 'FALSE', BUILD_BOOST_IOSTREAMS: 'FALSE' }
+          - { name: 'substrait', BUILD_CORE: 'FALSE', BUILD_SUBSTRAIT: 'TRUE', BUILD_BOOST_IOSTREAMS: 'FALSE' }
+          - { name: 'boost_iostreams', BUILD_CORE: 'FALSE', BUILD_SUBSTRAIT: 'FALSE', BUILD_BOOST_IOSTREAMS: 'TRUE' }
     steps:
       - uses: actions/checkout@v4
         with:
@@ -103,6 +110,7 @@ jobs:
         env:
           BUILD_CORE: ${{ matrix.build_type.BUILD_CORE }}
           BUILD_SUBSTRAIT: ${{ matrix.build_type.BUILD_SUBSTRAIT }}
+          BUILD_BOOST_IOSTREAMS: ${{ matrix.build_type.BUILD_BOOST_IOSTREAMS }}
         run: make deps.linux.arm64
       - uses: actions/upload-artifact@v4
         with:
