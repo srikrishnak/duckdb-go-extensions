@@ -4,6 +4,9 @@ DUCKDB_BRANCH=v1.1.1
 SUBSTRAIT_REPO=https://github.com/substrait-io/duckdb-substrait-extension.git
 SUBSTRAIT_BRANCH=main
 
+BOOST_REPO=https://github.com/boostorg/boost.git
+BOOST_BRANCH=boost-1.87.0
+
 CFLAGS   = -O3
 CXXFLAGS = -O3
 CC 		 = ""
@@ -31,6 +34,15 @@ SUBSTRAIT_COMMAND = \
 	cd .. && \
 	cp substrait/build/release/extension/substrait/libsubstrait_extension.a deps/$(DEP_NAME)
 
+BOOST_IOSTREAMS_COMMAND = \
+	mkdir -p ./boost_include && \
+	export BOOST_INCLUDEDIR=$(PWD)/boost_include && \
+	cd boost && \
+	./bootstrap.sh && \
+	./b2 headers && \
+	./b2 libs/iostreams stage && \
+	cp ./stage/lib/libboost_iostreams.a ../deps/$(DEP_NAME)
+
 PRE_COMPILE_TARGETS :=
 
 # Add
@@ -42,10 +54,15 @@ ifneq ($(BUILD_SUBSTRAIT),false)
 PRE_COMPILE_TARGETS += substrait
 endif
 
+ifneq ($(BUILD_BOOST_IOSTREAMS),false)
+PRE_COMPILE_TARGETS += boost
+endif
+
 define get_build_commands
 $(MKDIR_COMMAND)
 $(if $(filter TRUE,$(or $(BUILD_CORE),TRUE)), $(CORE_COMMAND))
 $(if $(filter TRUE,$(or $(BUILD_SUBSTRAIT),TRUE)), $(SUBSTRAIT_COMMAND))
+$(if $(filter TRUE,$(or $(BUILD_BOOST_IOSTREAMS),TRUE)), $(BOOST_IOSTREAMS_COMMAND))
 endef
 
 .PHONY: duckdb
@@ -57,6 +74,11 @@ duckdb:
 substrait:
 	rm -rf substrait
 	git clone -b $(SUBSTRAIT_BRANCH) --depth 1 $(SUBSTRAIT_REPO) --recurse-submodules substrait
+
+.PHONY: boost
+boost:
+	rm -rf boost
+	git clone -b $(BOOST_BRANCH) --depth 1 $(BOOST_REPO) --recurse-submodules
 
 .PHONY: deps.header
 deps.header: duckdb substrait
