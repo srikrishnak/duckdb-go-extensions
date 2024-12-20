@@ -3,6 +3,7 @@
 #include "include/substrait_extension.hpp"
 #include "include/tpcds_extension.hpp"
 #include "include/tpch_extension.hpp"
+#include "include/base64.h"
 
 // this is a copy of an internal duckdb structure as we need it to convert the c handle to a C++ handle.
 // Original structure is here: https://github.com/duckdb/duckdb/blob/main/src/include/duckdb/main/capi/capi_internal.hpp#L31
