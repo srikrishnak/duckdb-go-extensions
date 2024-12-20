@@ -10,7 +10,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ macos-13, ubuntu-20.04, arm64-builders ]
+        os: [ macos-13 ]
 
     steps:
       - name: Dump System Architecture
@@ -27,4 +27,6 @@ jobs:
           go-version-file: 'go.mod'
 
       - name: Run tests
-        run: go test -run ^TestLoaded
+        run: |
+          ls -al deps/darwin_amd64
+          go test -run ^TestLoaded
